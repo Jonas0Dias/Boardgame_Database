@@ -61,11 +61,9 @@ export async function finishRentals(req,res){
 
     try{
         const checkIfExist = await db.query('select * from rentals where id=$1',[id])
-        console.log(checkIfExist.rowCount)
 
         if(checkIfExist.rowCount===0){
             res.sendStatus(404);
-            console.log('teste')
             return;
         }
 
@@ -87,5 +85,29 @@ export async function finishRentals(req,res){
         
     }catch(err){
        res.send(err.message)
+    }
+}
+
+export async function deleteRentals(req,res){
+    const { id } =  req.params
+    
+    try{
+      
+        const checkIfExist = await db.query('select * from rentals where id=$1',[id]);
+
+        if(checkIfExist.rowCount===0){
+            res.sendStatus(404);
+            return;
+        }
+
+        if(checkIfExist.rows[0].returnDate === null){
+            res.sendStatus(400)
+            return;
+        }
+        
+        await db.query('delete from rentals where id=$1',[id])
+        res.sendStatus(200)
+    }catch(err){
+        res.status(500).send(err.message)
     }
 }

@@ -1,11 +1,12 @@
 import { Router } from "express";
-import { getRentals, postRentals, finishRentals } from "../controllers/rentalsController.js";
+import { getRentals, postRentals, finishRentals, deleteRentals } from "../controllers/rentalsController.js";
 
 const rentalsRouter =Router();
 
 rentalsRouter.get("/rentals", getRentals);
 rentalsRouter.post("/rentals", postRentals);
 rentalsRouter.post("/rentals/:id/return", finishRentals);
+rentalsRouter.delete("/rentals/:id", deleteRentals);
 
 
 
