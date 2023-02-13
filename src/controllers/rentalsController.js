@@ -16,12 +16,8 @@ export async function postRentals(req,res){
     const {customerId, gameId, daysRented} = {...req.body}
     const {error} = createRentalSchema.validate(req.body)
 
-    const dataAtual = new Date();
-    const dia = dataAtual.getDate();
-    const mes = dataAtual.getMonth() + 1;
-    const ano = dataAtual.getFullYear();
-    const rentDate = `${dia}/${mes}/${ano}`
-
+   
+    const rentDate = new Date();
     try{
         
         if(error){
@@ -53,5 +49,43 @@ export async function postRentals(req,res){
       
     }catch(err){
         res.status(500).send(err.message)
+    }
+}
+
+export async function finishRentals(req,res){
+
+
+
+    const returnDate = new Date();
+    const { id } =  req.params
+
+    try{
+        const checkIfExist = await db.query('select * from rentals where id=$1',[id])
+        console.log(checkIfExist.rowCount)
+
+        if(checkIfExist.rowCount===0){
+            res.sendStatus(404);
+            console.log('teste')
+            return;
+        }
+
+        if(checkIfExist.rows[0].delayFee !== null){
+            res.sendStatus(400)
+            return;
+        }
+
+        const pricePerDay = checkIfExist.rows[0].originalPrice/checkIfExist.rows[0].daysRented
+       await db.query('update rentals set "returnDate"=$1 where id=$2',[returnDate,id]) // upando a coluna de data de retorno do aluguel quando devolverem
+       
+       const rentDate = checkIfExist.rows[0].rentDate
+       const diffEmMilissegundos = returnDate.getTime() - rentDate.getTime();
+       let diffEmDias = Math.floor(diffEmMilissegundos / (1000 * 60 * 60 * 24));
+       diffEmDias = Math.max(diffEmDias, 0);
+
+        await db.query('update rentals set "delayFee"=$1 where id=$2',[diffEmDias*pricePerDay,id])
+        res.sendStatus(200);
+        
+    }catch(err){
+       res.send(err.message)
     }
 }
