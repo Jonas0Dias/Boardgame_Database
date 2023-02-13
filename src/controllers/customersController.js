@@ -65,8 +65,8 @@ export async function updateCustomers(req,res){
             return;
         }
         const checkIfExist = await db.query(`select * from customers where cpf = $1;`,[cpf]);
-        
-        if(checkIfExist.rowCount !== 0 && checkIfExist.rows[0].id !== id){
+
+        if(checkIfExist.rowCount!==0 && checkIfExist.rows[0].id !== parseInt(id)){
             res.sendStatus(409);
             return;
         }
