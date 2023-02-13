@@ -48,7 +48,7 @@ export async function postRentals(req,res){
 
         await db.query(`INSERT INTO rentals ("customerId", "gameId", "rentDate", "daysRented", "returnDate", "originalPrice", "delayFee") values ($1, $2, $3, $4, $5, $6, $7)`, [customerId, gameId, rentDate, daysRented, null, daysRented*gameData.rows[0].pricePerDay, null ]);
 
-        res.sendStatus(201);
+        res.sendStatus(200);
       
       
     }catch(err){
@@ -60,7 +60,7 @@ export async function finishRentals(req,res){
 
 
 
-    const returnDate = new Date(2023,1,19);
+    const returnDate = new Date();
     const { id } =  req.params
 
     try{
