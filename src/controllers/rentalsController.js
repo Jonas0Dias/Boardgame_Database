@@ -25,6 +25,10 @@ export async function postRentals(req,res){
             return;
         }
 
+        if(daysRented<=0){
+            res.sendStatus(400);
+        }
+
         const checkIfExistGame = await db.query(`select * from games where id = $1;`,[gameId]);
         const checkIfExistCustomer = await db.query(`select * from customers where id = $1;`,[customerId]);
        
@@ -56,7 +60,7 @@ export async function finishRentals(req,res){
 
 
 
-    const returnDate = new Date();
+    const returnDate = new Date(2023,1,19);
     const { id } =  req.params
 
     try{
@@ -76,11 +80,12 @@ export async function finishRentals(req,res){
        await db.query('update rentals set "returnDate"=$1 where id=$2',[returnDate,id]) // upando a coluna de data de retorno do aluguel quando devolverem
        
        const rentDate = checkIfExist.rows[0].rentDate
+       const daysRented = checkIfExist.rows[0].daysRented
        const diffEmMilissegundos = returnDate.getTime() - rentDate.getTime();
-       let diffEmDias = Math.floor(diffEmMilissegundos / (1000 * 60 * 60 * 24));
-       diffEmDias = Math.max(diffEmDias, 0);
-
-        await db.query('update rentals set "delayFee"=$1 where id=$2',[diffEmDias*pricePerDay,id])
+       const diffEmDias = Math.floor(diffEmMilissegundos / (1000 * 60 * 60 * 24));
+       let delayFee = diffEmDias - daysRented
+       delayFee = Math.max(delayFee, 0);
+        await db.query('update rentals set "delayFee"=$1 where id=$2',[delayFee*pricePerDay,id])
         res.sendStatus(200);
         
     }catch(err){

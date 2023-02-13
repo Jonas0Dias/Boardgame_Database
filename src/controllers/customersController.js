@@ -41,6 +41,10 @@ export async function getCustomerById(req,res){
 
     try{
         const customer = await db.query('select * from customers where id=$1',[id]);
+        if(customer.rowCount===0){
+            res.sendStatus(404);
+            return;
+        }
         res.send(customer.rows[0])
     }catch(err){
         res.status(500).send(err.message)
@@ -68,7 +72,7 @@ export async function updateCustomers(req,res){
        
 
         await db.query(`update customers set name=$1, phone=$2, cpf=$3, birthday=$4 where id=$5`, [name, phone, cpf, birthday,id]);
-        res.sendStatus(201);
+        res.sendStatus(200);
     }catch(err){
         res.status(500).send(err.message)
     }
